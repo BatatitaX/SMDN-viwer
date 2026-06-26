@@ -1,39 +1,114 @@
-import { useEffect, useMemo, useState } from 'react'
-import smdnLogo from './assets/brand/smdn-logo.svg'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import logo from './assets/brand/logo.svg'
+import logoClara from './assets/brand/logo-clara.svg'
 
-const carouselSlides = [
+
+function XIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="featherIcon closeIcon"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+
+const DEFAULT_ACCESSIBILITY = {
+  fontSize: 'medium',
+  theme: 'system',
+  highContrast: false,
+  reduceMotion: false,
+}
+
+const webSlides = [
   {
     eyebrow: 'Dashboard Web',
     title: 'Panorama operacional',
-    text: 'Mapa, alertas ativos, ocorrências críticas e leitura rápida da situação municipal.',
+    text: 'Mapa, alertas ativos, vítimas, ocorrências críticas e status de atendimento em uma visão centralizada.',
     badge: '01',
-    items: ['Alertas', 'Mapa', 'Ocorrências'],
+    items: ['Mapa', 'Alertas', 'Ocorrências'],
   },
   {
-    eyebrow: 'Aplicativo Mobile',
-    title: 'Alerta na palma da mão',
-    text: 'O cidadão acompanha riscos, consulta mapa e aciona suporte em momentos de emergência.',
+    eyebrow: 'Relatórios',
+    title: 'Dados para decisão',
+    text: 'Indicadores, gráficos e leitura rápida para apoiar planejamento, resposta e prestação de contas.',
     badge: '02',
-    items: ['SOS', 'Mapa', 'Relato'],
+    items: ['KPI', 'Municípios', 'Severidade'],
   },
   {
-    eyebrow: 'Prevenção',
-    title: 'Informação antes do desastre',
-    text: 'Guia de sobrevivência, clima e orientação visual para reduzir exposição ao risco.',
+    eyebrow: 'Auditoria',
+    title: 'Rastreabilidade das ações',
+    text: 'Registro de alterações, responsáveis e histórico operacional para controle administrativo.',
     badge: '03',
-    items: ['Clima', 'Guia', 'Chat'],
-  },
-  {
-    eyebrow: 'Gestão integrada',
-    title: 'Dados para tomada de decisão',
-    text: 'A Defesa Civil acompanha registros, auditoria e distribuição dos alertas em tempo real.',
-    badge: '04',
-    items: ['Auditoria', 'Relatórios', 'Usuários'],
+    items: ['Logs', 'Usuários', 'Controle'],
   },
 ]
 
+const mobileSlides = [
+  {
+    eyebrow: 'Aplicativo Mobile',
+    title: 'Mapa e alertas do cidadão',
+    text: 'O usuário visualiza riscos, acompanha alertas e entende rapidamente a situação do território.',
+    badge: '01',
+    items: ['Mapa', 'Alerta', 'Localização'],
+  },
+  {
+    eyebrow: 'Emergência',
+    title: 'SOS e relato em poucos toques',
+    text: 'Fluxo pensado para emergência: pedir ajuda, registrar ocorrência e enviar informações relevantes.',
+    badge: '02',
+    items: ['SOS', 'Relato', 'Foto'],
+  },
+  {
+    eyebrow: 'Prevenção',
+    title: 'Clima, guia e suporte',
+    text: 'Consulta de clima, guia de sobrevivência e apoio visual para prevenção de desastres.',
+    badge: '03',
+    items: ['Clima', 'Guia', 'Chat'],
+  },
+]
+
+function ChevronLeftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="featherIcon" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  )
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="featherIcon" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  )
+}
+
+function SettingsOption({ active, children, onClick }) {
+  return (
+    <button type="button" className={`settingsOption ${active ? 'active' : ''}`} onClick={onClick} aria-pressed={active}>
+      {children}
+    </button>
+  )
+}
+
 function AccessibilityMenu({ accessibility, setAccessibility }) {
   const [open, setOpen] = useState(false)
+
+  function update(key, value) {
+    setAccessibility((current) => ({
+      ...current,
+      [key]: value,
+    }))
+  }
 
   function toggle(key) {
     setAccessibility((current) => ({
@@ -42,169 +117,240 @@ function AccessibilityMenu({ accessibility, setAccessibility }) {
     }))
   }
 
-  function increaseFont() {
-    setAccessibility((current) => ({
-      ...current,
-      fontScale: Math.min(current.fontScale + 0.08, 1.24),
-    }))
-  }
-
-  function decreaseFont() {
-    setAccessibility((current) => ({
-      ...current,
-      fontScale: Math.max(current.fontScale - 0.08, 0.9),
-    }))
-  }
-
   function reset() {
-    setAccessibility({
-      highContrast: false,
-      reduceMotion: false,
-      fontScale: 1,
-    })
+    setAccessibility(DEFAULT_ACCESSIBILITY)
   }
 
   return (
     <div className="accessMenu">
-      <button
-        type="button"
-        className="accessTrigger"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-      >
+      <button type="button" className="accessTrigger" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
         <span aria-hidden="true">⚙</span>
         Acessibilidade
       </button>
 
       {open && (
-        <div className="accessDropdown" role="dialog" aria-label="Opções de acessibilidade">
+        <div className="accessDropdown" role="dialog" aria-label="Configurações de acessibilidade">
           <div className="accessHeader">
-            <strong>Acessibilidade</strong>
-            <span>Personalize a visualização</span>
+            <div>
+              <strong>Acessibilidade</strong>
+              <span>Configurações da apresentação</span>
+            </div>
+
+            <button
+              type="button"
+              className="accessClose"
+              onClick={() => setOpen(false)}
+              aria-label="Fechar acessibilidade"
+            >
+              <XIcon />
+            </button>
           </div>
 
-          <div className="accessGrid">
-            <button type="button" onClick={decreaseFont}>A-</button>
-            <button type="button" onClick={increaseFont}>A+</button>
-            <button
-              type="button"
-              className={accessibility.highContrast ? 'active' : ''}
-              onClick={() => toggle('highContrast')}
-              aria-pressed={accessibility.highContrast}
-            >
-              Alto contraste
-            </button>
-            <button
-              type="button"
-              className={accessibility.reduceMotion ? 'active' : ''}
-              onClick={() => toggle('reduceMotion')}
-              aria-pressed={accessibility.reduceMotion}
-            >
-              Reduzir movimento
-            </button>
-            <button type="button" onClick={reset} className="wide">
-              Restaurar
-            </button>
+          <div className="settingsGroup">
+            <span className="settingsTitle">Letras</span>
+            <div className="settingsGrid four">
+              <SettingsOption active={accessibility.fontSize === 'small'} onClick={() => update('fontSize', 'small')}>Pequenas</SettingsOption>
+              <SettingsOption active={accessibility.fontSize === 'medium'} onClick={() => update('fontSize', 'medium')}>Médias</SettingsOption>
+              <SettingsOption active={accessibility.fontSize === 'large'} onClick={() => update('fontSize', 'large')}>Grandes</SettingsOption>
+              <SettingsOption active={accessibility.fontSize === 'huge'} onClick={() => update('fontSize', 'huge')}>Enormes</SettingsOption>
+            </div>
           </div>
+
+          <div className="settingsGroup">
+            <span className="settingsTitle">Modo</span>
+            <div className="settingsGrid three">
+              <SettingsOption active={accessibility.theme === 'system'} onClick={() => update('theme', 'system')}>Sistema</SettingsOption>
+              <SettingsOption active={accessibility.theme === 'light'} onClick={() => update('theme', 'light')}>Claro</SettingsOption>
+              <SettingsOption active={accessibility.theme === 'dark'} onClick={() => update('theme', 'dark')}>Escuro</SettingsOption>
+            </div>
+          </div>
+
+          <div className="settingsGroup">
+            <span className="settingsTitle">Visualização</span>
+            <div className="settingsGrid two">
+              <SettingsOption active={accessibility.highContrast} onClick={() => toggle('highContrast')}>Alto contraste</SettingsOption>
+              <SettingsOption active={accessibility.reduceMotion} onClick={() => toggle('reduceMotion')}>Remover animações</SettingsOption>
+            </div>
+          </div>
+
+          <button type="button" className="restoreButton" onClick={reset}>
+            Restaurar ao padrão
+          </button>
         </div>
       )}
     </div>
   )
 }
 
-function CarouselMock({ paused, setPaused }) {
+function WebMockup({ slide }) {
+  return (
+    <div className="webMockup">
+      <div className="mockHeader">
+        <div>
+          <span>{slide.eyebrow}</span>
+          <strong>{slide.title}</strong>
+        </div>
+        <b>{slide.badge}</b>
+      </div>
+
+      <div className="dashboardGrid">
+        <div className="mapPanel">
+          <span className="pin pinA" />
+          <span className="pin pinB" />
+          <span className="pin pinC" />
+          <div className="routeLine" />
+        </div>
+
+        <div className="sidePanel">
+          <strong>{slide.title}</strong>
+          <p>{slide.text}</p>
+          <div className="mockList">
+            {slide.items.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        </div>
+
+        <div className="metricCard">
+          <span>Alertas</span>
+          <strong>06</strong>
+        </div>
+        <div className="metricCard">
+          <span>Registros</span>
+          <strong>164</strong>
+        </div>
+        <div className="metricCard">
+          <span>Operadores</span>
+          <strong>08</strong>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MobileMockup({ slide }) {
+  return (
+    <div className="mobileMockup">
+      <div className="phoneShell">
+        <div className="phoneNotch" />
+        <div className="phoneScreen">
+          <div className="phoneTop">
+            <span>{slide.eyebrow}</span>
+            <b>{slide.badge}</b>
+          </div>
+          <div className="phoneMap">
+            <span className="pin pinA" />
+            <span className="pin pinB" />
+            <span className="pin pinC" />
+            <div className="routeLine" />
+          </div>
+          <div className="phoneCard">
+            <strong>{slide.title}</strong>
+            <p>{slide.text}</p>
+            <div className="mockList">
+              {slide.items.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AutoCarousel({ slides, paused, setPaused, variant = 'web' }) {
   const [index, setIndex] = useState(0)
-  const active = carouselSlides[index]
+  const active = slides[index]
+  const dragStartX = useRef(null)
+  const dragDeltaX = useRef(0)
+  const isDragging = useRef(false)
 
   useEffect(() => {
     if (paused) return undefined
 
     const interval = window.setInterval(() => {
-      setIndex((current) => (current + 1) % carouselSlides.length)
+      setIndex((current) => (current + 1) % slides.length)
     }, 4200)
 
     return () => window.clearInterval(interval)
-  }, [paused])
+  }, [paused, slides.length])
 
   function previousSlide() {
-    setIndex((current) => (current - 1 + carouselSlides.length) % carouselSlides.length)
+    setIndex((current) => (current - 1 + slides.length) % slides.length)
   }
 
   function nextSlide() {
-    setIndex((current) => (current + 1) % carouselSlides.length)
+    setIndex((current) => (current + 1) % slides.length)
+  }
+
+  function startDrag(event) {
+    dragStartX.current = event.clientX
+    dragDeltaX.current = 0
+    isDragging.current = true
+  }
+
+  function moveDrag(event) {
+    if (!isDragging.current || dragStartX.current === null) return
+    dragDeltaX.current = event.clientX - dragStartX.current
+  }
+
+  function endDrag() {
+    if (!isDragging.current) return
+
+    const distance = dragDeltaX.current
+    dragStartX.current = null
+    dragDeltaX.current = 0
+    isDragging.current = false
+
+    if (Math.abs(distance) < 42) return
+
+    if (distance > 0) {
+      previousSlide()
+    } else {
+      nextSlide()
+    }
   }
 
   return (
-    <section className="visualFrame" aria-label="Carrossel de apresentação do SMDN">
+    <section className={`visualFrame ${variant === 'mobile' ? 'mobileFrame' : ''}`} aria-label={`Carrossel ${variant}`}>
       <div className="visualHeader">
         <div>
-          <span className="visualKicker">Demonstração visual</span>
+          <span className="visualKicker">{variant === 'web' ? 'Web em destaque' : 'Mobile em destaque'}</span>
           <h2>{active.title}</h2>
         </div>
 
-        <button
-          type="button"
-          className={`presentationButton ${paused ? 'paused' : ''}`}
-          onClick={() => setPaused((value) => !value)}
-          aria-pressed={paused}
-        >
-          {paused ? 'Continuar apresentação' : 'Apresentação automática'}
+        <button type="button" className={`presentationButton ${paused ? 'paused' : ''}`} onClick={() => setPaused((value) => !value)} aria-pressed={paused}>
+          {paused ? 'Continuar' : 'Automático'}
         </button>
       </div>
 
       <p className="visualDescription">{active.text}</p>
+      <p className="swipeHint">No celular, arraste para navegar pelo carrossel.</p>
 
-      <div className="carouselArea">
+      <div
+        className="carouselArea"
+        onPointerDown={startDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onPointerLeave={endDrag}
+      >
         {paused && (
           <>
-            <button
-              type="button"
-              className="carouselArrow left"
-              onClick={previousSlide}
-              aria-label="Slide anterior"
-            >
-              ‹
+            <button type="button" className="carouselArrow left" onClick={previousSlide} aria-label="Slide anterior">
+              <ChevronLeftIcon />
             </button>
-            <button
-              type="button"
-              className="carouselArrow right"
-              onClick={nextSlide}
-              aria-label="Próximo slide"
-            >
-              ›
+            <button type="button" className="carouselArrow right" onClick={nextSlide} aria-label="Próximo slide">
+              <ChevronRightIcon />
             </button>
           </>
         )}
 
-        <div className="screenMockup">
-          <div className="mockTopbar">
-            <span>{active.eyebrow}</span>
-            <strong>{active.badge}</strong>
-          </div>
-
-          <div className="mockContent">
-            <div className="mockMap">
-              <span className="pin pinA" />
-              <span className="pin pinB" />
-              <span className="pin pinC" />
-              <div className="routeLine" />
-            </div>
-
-            <div className="mockPanel">
-              <strong>{active.title}</strong>
-              <p>{active.text}</p>
-
-              <div className="mockList">
-                {active.items.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        {variant === 'web' ? <WebMockup slide={active} /> : <MobileMockup slide={active} />}
 
         <div className="carouselDots" aria-label="Indicadores do carrossel">
-          {carouselSlides.map((slide, slideIndex) => (
+          {slides.map((slide, slideIndex) => (
             <button
               key={slide.badge}
               type="button"
@@ -223,21 +369,41 @@ function CarouselMock({ paused, setPaused }) {
 }
 
 export default function App() {
-  const [paused, setPaused] = useState(false)
-  const [accessibility, setAccessibility] = useState({
-    highContrast: false,
-    reduceMotion: false,
-    fontScale: 1,
+  const [webPaused, setWebPaused] = useState(false)
+  const [mobilePaused, setMobilePaused] = useState(false)
+  const [accessibility, setAccessibility] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem('smdn-viewer-accessibility')
+      return saved ? { ...DEFAULT_ACCESSIBILITY, ...JSON.parse(saved) } : DEFAULT_ACCESSIBILITY
+    } catch {
+      return DEFAULT_ACCESSIBILITY
+    }
   })
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--font-scale', accessibility.fontScale)
-  }, [accessibility.fontScale])
+    try {
+      window.localStorage.setItem('smdn-viewer-accessibility', JSON.stringify(accessibility))
+    } catch {
+      // ignora indisponibilidade do localStorage
+    }
+  }, [accessibility])
+
+  useEffect(() => {
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    })
+  }, [])
 
   const shellClass = useMemo(
     () =>
       [
         'viewerLanding',
+        `font-${accessibility.fontSize}`,
+        `theme-${accessibility.theme}`,
         accessibility.highContrast ? 'highContrast' : '',
         accessibility.reduceMotion ? 'reduceMotion' : '',
       ]
@@ -252,29 +418,45 @@ export default function App() {
       <div className="ambientGlow ambientGlowRight" />
 
       <header className="topBar">
-        <a className="brandLink" href="#conteudo-principal" aria-label="SMDN Viewer">
-          <img src={smdnLogo} alt="SMDN Viewer" className="brandLogo" />
-        </a>
+        <div className="brandLink" aria-label="SMDN Viewer">
+          <img src={logo} alt="SMDN Viewer" className="brandLogo logoLight" />
+          <img src={logoClara} alt="SMDN Viewer" className="brandLogo logoDark" />
+        </div>
 
         <AccessibilityMenu accessibility={accessibility} setAccessibility={setAccessibility} />
       </header>
 
-      <main id="conteudo-principal" className="heroSection">
-        <section className="heroCopy">
-          <span className="eyebrow">SMDN · Sistema de Monitoramento de Desastres Naturais</span>
+      <main className="pageStack">
+        <section className="webHeroSection" aria-label="Apresentação do SMDN Web">
+          <article className="heroCopy">
+            <span className="eyebrow">SMDN Web · painel de monitoramento</span>
 
-          <h1>
-            Monitore riscos e apresente o sistema.
-            <span>Instale já nosso aplicativo.</span>
-          </h1>
+            <h1>
+              Apresente o painel web do SMDN em tempo real.
+              <span>Decisão rápida para cenários críticos.</span>
+            </h1>
 
-          <p className="lead">
-            Viewer visual do SMDN para telão, banca ou demonstração, mantendo a identidade
-            do painel web e liberando o destaque principal para o carrossel do sistema.
-          </p>
+            <p className="lead">
+              O viewer prioriza a visão operacional do painel web: mapa, alertas,
+              ocorrências, relatórios e auditoria em uma vitrine única para demonstrações.
+            </p>
+          </article>
+
+          <AutoCarousel slides={webSlides} paused={webPaused} setPaused={setWebPaused} variant="web" />
         </section>
 
-        <CarouselMock paused={paused} setPaused={setPaused} />
+        <section className="mobileShowcase" aria-label="Apresentação do aplicativo mobile">
+          <article className="mobileCopy">
+            <span className="eyebrow">Aplicativo Mobile · cidadão conectado</span>
+            <h2>Uma experiência pensada para quem acessa pelo celular.</h2>
+            <p>
+              No mobile, o viewer vira uma apresentação vertical: leitura rápida, cards empilhados,
+              controles grandes e navegação confortável para toque.
+            </p>
+          </article>
+
+          <AutoCarousel slides={mobileSlides} paused={mobilePaused} setPaused={setMobilePaused} variant="mobile" />
+        </section>
       </main>
     </div>
   )
