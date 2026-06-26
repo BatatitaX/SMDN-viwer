@@ -32,19 +32,6 @@ const carouselSlides = [
   },
 ]
 
-const highlights = [
-  'Alertas em tempo real',
-  'Mapa de risco',
-  'Ocorrências críticas',
-  'Experiência mobile integrada',
-]
-
-const features = [
-  'Apresentação única para telão, banca ou demonstração.',
-  'Visual escuro alinhado ao painel SMDN Web.',
-  'Carrossel automático com controle manual quando pausado.',
-]
-
 function AccessibilityMenu({ accessibility, setAccessibility }) {
   const [open, setOpen] = useState(false)
 
@@ -277,31 +264,14 @@ export default function App() {
           <span className="eyebrow">SMDN · Sistema de Monitoramento de Desastres Naturais</span>
 
           <h1>
-            Monitore riscos, apresente o sistema e convide seu público:
-            <span> instale já nosso aplicativo.</span>
+            Monitore riscos e apresente o sistema.
+            <span>Instale já nosso aplicativo.</span>
           </h1>
 
           <p className="lead">
-            Uma vitrine visual do SMDN para rodar em telão, banca ou demonstração,
-            mantendo a identidade do painel web e destacando o aplicativo mobile.
+            Viewer visual do SMDN para telão, banca ou demonstração, mantendo a identidade
+            do painel web e liberando o destaque principal para o carrossel do sistema.
           </p>
-
-          <div className="chipRow" aria-label="Destaques do sistema">
-            {highlights.map((item) => (
-              <span key={item} className="chip">{item}</span>
-            ))}
-          </div>
-
-          <div className="ctaRow">
-            <button type="button" className="primaryButton">Instale já nosso aplicativo</button>
-            <button type="button" className="ghostButton">Conheça o ecossistema SMDN</button>
-          </div>
-
-          <ul className="featureList">
-            {features.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
         </section>
 
         <CarouselMock paused={paused} setPaused={setPaused} />
